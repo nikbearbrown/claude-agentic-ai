@@ -1,174 +1,126 @@
-# The Agent Arrives in Ordinary Work
+# Chapter 0 — The Agent Arrives in Ordinary Work
 
-**Capability built:** Recognize why agentic AI changes the user's responsibility.
+You almost sent it.
 
----
+Forty-three PDFs, one afternoon, a deadline bearing down. You handed the task to an agent — describe what you need, let it run, come back in twenty minutes. There was a table. It looked right. The formatting was clean. The numbers appeared reasonable. You felt the particular relief of watching a machine do in twenty minutes what would have taken you three hours.
 
-## A Tuesday Afternoon
+Then you noticed a figure that didn't add up. You pulled the source document. The agent had read the correct file, found the correct column, and misread a row — a subtotal taken for a grand total. Every downstream figure in the table was wrong.
 
-It starts simply enough. You have a folder of quarterly reports from three departments, a deadline before end of day, and no time to read forty-three PDFs. You open Claude, describe the task, and tell it to pull the key numbers into a summary table.
+The output was fluent. The work was wrong.
 
-You come back twenty minutes later. There is a table. It looks right. The formatting is clean. The numbers appear reasonable. You feel relieved.
+This is not primarily a story about AI failure. The agent did what agents do: it executed a delegated task within the access it was given and reported completion. No part of that sequence was broken. What was broken was the supervision design. Nobody had built a step to catch a misread row before the table went out.
 
-Then you notice a figure that looks off — a revenue total that does not match what you remember from the finance call. You check the source document. The agent had read the correct file but misread a row: it confused a subtotal for a grand total. Every downstream figure in the table is wrong.
-
-The artifact was fluent. The work was wrong. And you almost sent it.
-
-This scenario is not unusual, and it is not primarily a story about AI failure. It is a story about a user who delegated work without designing supervision. The agent had access to files, produced plausible output, and reported completion. No step in that sequence was designed to catch a misread row.
-
-This book is about designing the steps that catch the errors — before the output leaves the screen.
+This book is about building that step. Every chapter adds to one answer: what does a user need to do differently when the AI can act, not just answer?
 
 ---
 
-## What This Chapter Lets You Do
+## The Change That Matters
 
-After this chapter, you will be able to:
+For most of AI's public life, the interaction was conversational. You asked; it answered. The system produced text, and you decided what to do with that text. If the answer was wrong, the cost was whatever you lost acting on it — but the AI itself had not moved anything. Its reach ended at your screen.
 
-- Explain in plain terms why agentic AI is different from a chatbot
-- Name the three-part operating rule that governs all agentic work in this book
-- Identify at least one concrete surface where Claude agents can take action in ordinary workflows
-- Recognize why more capability creates more supervisory responsibility, not less
+That has changed.
 
----
+Modern AI systems can now be given tools. A tool, in this context, is not a metaphor — it is a capability that lets the system act on something outside the conversation: read a file, write a file, run a command, search the web, populate a spreadsheet, open a browser, operate an application. When a system has tools, it is no longer producing text for you to evaluate. It is operating in an environment. It can change the state of things.
 
-## The Shift: From Generated Content to Delegated Action
+When something can change the state of things, your relationship to it changes fundamentally. You are no longer reading a response. You are supervising a process that is reaching into your files, your connected services, and potentially your colleagues' work.
 
-For most of AI's public history, the user relationship with an AI system was conversational. You asked; it answered. It produced text, and you decided what to do with that text. The AI had no reach into the world beyond the response on your screen. If the answer was wrong, the cost was the time you spent acting on it. The AI itself had not moved anything.
+The research community calls this an **agent**: a system that can observe a context, form a plan, use tools to act, check the results, and cycle back (Tang et al., 2023; Li et al., 2024). The observation-action-feedback loop is what separates an agent from an answering machine. It is also what makes the stakes different.
 
-That relationship has changed.
-
-Modern AI systems — and Claude in particular — can now be given tools. A tool, in this context, is a capability that lets the system act on something outside the conversation: read a file, write a file, run a command, search the web, fill a spreadsheet, open a browser, use an application. When an AI system has tools, it is no longer just producing text. It is operating in an environment. It can change the state of things.
-
-When a system can change the state of things, the user's relationship to that system changes fundamentally. You are no longer evaluating a response. You are supervising a process that is reaching into your work, your files, your connected services, and potentially your colleagues' work.
-
-This is what the research community calls an **agent**: a system that can observe a context, form a plan, use tools to act, check the results, and report back (Tang et al., 2023; Li et al., 2024). The observation-action-feedback cycle is what distinguishes an agent from an answering machine.
-
-Claude Code and Claude Cowork are Anthropic's concrete implementations of this idea for everyday use [verify — current as of writing]. Claude Code can inspect a codebase, run tests, edit files, and report the results of those changes (Anthropic, "Claude Code overview"). Claude Cowork can work across documents, spreadsheets, and browser sessions — gathering, transforming, and producing artifacts in a file system you own (Anthropic, "Get started with Claude Cowork"). Both systems can do things that persist after the conversation ends. That is the operative difference.
+Claude Code can inspect a codebase, run tests, edit files, and report what changed. Claude Cowork can move across documents, spreadsheets, and browser sessions — gathering, transforming, and producing artifacts in a file system you own [verify — current as of writing]. Both systems can do things that persist after the conversation ends. That persistence is the operative difference. A wrong answer in a chat window stays in the chat window. A wrong number written into a spreadsheet, a file deleted, a form submitted — those changes are in the world.
 
 ---
 
-## Agents Are Not Magic Autonomy
+## The Analogy Is Delegation, Not Magic
 
-The word "agent" can mislead. It sounds like the system is self-directing, autonomous, operating on its own initiative. That is not what a useful agent is. A useful agent is a system that can execute delegated work within defined boundaries, with human supervision at key points.
+The word *agent* can mislead. It sounds like the system is self-directing, operating on its own initiative, pursuing goals you set and then left alone. That is not what a useful agent is.
 
-The analogy is closer to delegation than to independence. When you delegate work to a capable colleague, you do not simply hand them the task and disappear. You describe the scope, you tell them what they can and cannot do, you agree on how they will check with you if something unexpected comes up, and you review the result before it goes out. The colleague's capability does not reduce your responsibility; it changes the form your responsibility takes.
+A useful agent is a system that executes delegated work within defined boundaries, with human supervision at key points.
 
-An agent works the same way. You define what it can observe. You define what it can do. You require it to surface its plan before acting. You review what it changed. You verify the output. The agent's capability can be large — and Claude Cowork operating in computer-use mode, where it can see and interact with the desktop, is genuinely powerful (Anthropic, "Let Claude use your computer in Cowork") [verify — current as of writing]. But the capability does not replace your judgment. It relocates your judgment: upstream, into design; and at checkpoints, into verification.
+The analogy that holds up is delegation to a capable colleague, not deployment of an autonomous system. When you delegate meaningful work, you do not hand over the task and disappear. You describe the scope. You say what they can and cannot touch. You agree on when they should check with you if something unexpected comes up. You review the result before it leaves the office. The colleague's capability does not reduce your responsibility — it changes the form your responsibility takes. The same transfer applies exactly to an agent.
 
-The automation research literature has known this for decades. Lisanne Bainbridge described it precisely in 1983: the more capable the automated system, the more demanding the supervisory role becomes, not less (Bainbridge, "Ironies of Automation," 1983). More automation creates new monitoring demands, new failure modes, and new intervention responsibilities. Parasuraman, Sheridan, and Wickens formalized this further: autonomy is a design variable, and the human role changes — but does not disappear — at every level (Parasuraman, Sheridan, and Wickens, 2000). These findings apply directly to AI agents.
+Lisanne Bainbridge described this dynamic in 1983, writing about automated industrial systems, before anyone was thinking about AI assistants. Her observation was precise: the more capable the automated system, the more demanding the supervisory role, not less (Bainbridge, 1983). More automation creates new monitoring demands, new failure modes, new intervention responsibilities. Parasuraman, Sheridan, and Wickens formalized it further: autonomy is a design variable, and the human role changes at every level but does not disappear (Parasuraman et al., 2000). What they documented in process control and aviation applies directly here. The AI agent does not reduce your role. It relocates it — upstream into design, and at checkpoints into verification.
 
 ---
 
-## The Control Triad: Scope, Approval, Verification
+## Three Concepts That Run Through Everything
 
-This book builds everything on three concepts. They appear in every chapter. They apply to every agentic workflow. They are the answer to the question: what does a user need to do differently when AI can act?
+This book builds on three ideas. They appear in every chapter. They apply to every agentic workflow. They are the answer to the question: what does a user actually need to do differently?
 
-**Scope** is the boundary you draw before the agent starts. What files can it read? What can it write? What services can it touch? What is outside the task? Scope is not just about safety — it is about quality. An agent given too broad a scope will attempt things it is not equipped to handle, and the resulting errors will be harder to trace. An agent given a clear scope can be supervised more precisely.
+**Scope** is the boundary you draw before the agent starts. What files can it read? What can it write? What services can it touch? What is outside the task entirely? Scope is not only about safety — it is about quality. An agent given too broad a scope will attempt things it is not equipped to handle, and the resulting errors will be harder to trace. An agent given a clear scope can be supervised more precisely because you know what it was supposed to do and can check whether it did that.
 
-**Approval** is the checkpoint where the human decides whether the planned action should proceed. This may happen before the first action, between major steps, or both. It is not a formality. It is the point where you read the plan, assess whether the proposed steps match the task, and decide whether the agent should proceed, revise, or stop. Approval is not a final polish; it is part of the control system.
+**Approval** is the checkpoint where you decide whether the planned action should proceed. This happens before the first action, between major steps, or both, depending on the stakes. It is not a formality. You read the plan, assess whether the proposed steps match the task as you understand it, and decide: proceed, revise, or stop. This is not final polish. It is part of the control system.
 
-**Verification** is the discipline of checking whether the output is correct, complete, and trustworthy — not just whether it looks finished. A verified output has been checked against its sources, tested for accuracy in at least a sample, and compared against the expected result. Verification is not the same as reading over something. It is the discipline of asking: what would have to be true for this to be wrong, and did I check that?
+**Verification** is the discipline of checking whether the output is correct, complete, and trustworthy — not just whether it looks finished. A verified output has been checked against its sources, tested for accuracy across at least a sample, and compared against the expected result. Verification is not the same as reading something over. It is the discipline of asking: what would have to be true for this to be wrong, and did I check that?
 
-These three — scope, approval, verification — are the operating rule of this book. Every chapter will add detail to one or more of them. But they are stated here, at the beginning, because they apply from the first task forward.
-
-The Anthropic help documentation for using Cowork safely articulates the same principle at the product level: real risk surfaces include files, apps, browser, plugins, MCP servers, scheduled tasks, and computer use, and each requires considered access decisions (Anthropic, "Use Claude Cowork safely"). The triad provides the framework for making those decisions across any surface.
+Scope. Approval. Verification. Everything else in this book is elaboration on one of these three.
 
 ---
 
 ## Where Agents Work in Ordinary Practice
 
-Agentic AI is not primarily a tool for specialized technical work. It arrives in ordinary professional work: report assembly, data extraction, file organization, research compilation, document drafting, code maintenance. Here are four examples that will recur throughout this book:
+Agentic AI is not arriving primarily in specialized technical work. It is arriving in the ordinary work of professional life: report assembly, data extraction, file organization, research compilation, document drafting, code maintenance. Four examples appear throughout this book:
 
-**Code repair.** Claude Code observes failing tests, edits the relevant files, reruns the tests, and reports the diff. The human defines what the issue is, approves the proposed changes, and reviews whether the fix works without breaking something else.
+**Code repair.** The agent observes failing tests, edits the relevant files, reruns the tests, and reports the diff. You defined what the issue is, approved the proposed changes, and now review whether the fix works without breaking something else.
 
-**Report assembly.** Claude Cowork reads source documents in a designated folder, extracts relevant facts, and builds a draft memo. The human confirms which sources are authoritative, checks for omissions, and verifies any figures before the memo is sent.
+**Report assembly.** The agent reads source documents in a designated folder, extracts relevant facts, and builds a draft memo. You confirmed which sources are authoritative, checked for omissions, and are now verifying figures before the memo goes anywhere.
 
-**Spreadsheet extraction.** Claude Cowork reads a set of PDFs and populates a data table. The human checks the row count matches the source documents, samples a subset of cells against the originals, and confirms the extraction schema was applied correctly.
+**Spreadsheet extraction.** The agent reads a set of PDFs and populates a data table. You checked that the row count matches the source documents, sampled a subset of cells against the originals, and confirmed the extraction schema was applied correctly.
 
-**Browser workflow.** Claude Cowork opens pages from a defined list of trusted sources to gather information. The human specifies which domains are in scope, confirms that no external-facing actions were taken, and checks the source list in the output.
+**Browser research.** The agent opens pages from a defined list of trusted sources to gather information. You specified which domains were in scope, confirmed that no external-facing actions were taken, and checked the source list in the output.
 
-Each of these workflows involves the agent doing real work that saves real time. Each requires the human to design scope before the work starts and to verify the output before it is used. The agent's value comes from doing the execution. The human's irreducible contribution is judgment: defining the boundary, reading the plan, and verifying the result.
+Each workflow involves the agent doing real work that saves real time. Each requires the human to design scope before the work starts and to verify the output before it is used. The agent's value is in execution. The human's contribution is judgment: defining the boundary, reading the plan, and verifying the result.
 
-**The human-only zone.** Not every task belongs to an agent. An agent should not send legal advice, delete production data, submit a grant application, or access protected health information without explicit governed approval from someone accountable for those decisions. This book is about supervised delegation, and supervision includes the decision not to delegate.
+There is also a boundary on the other side — work that should not be delegated to an agent. The agent should not send legal advice, delete production data, submit a grant application, or touch protected health information without explicit governed approval from someone accountable for those decisions. This book is about supervised delegation. Supervision includes the decision not to delegate.
 
 ---
 
 ## The Plan Is Not the Work
 
-One misconception deserves to be named early. When an agent presents a plan — a sequence of steps, a proposed tool sequence, a structured outline of what it intends to do — that plan can look like evidence that the agent understands the task. It is not.
+One misconception deserves to be named before the first chapter. When an agent presents a plan — a sequence of steps, a proposed tool sequence, a structured outline of what it intends to do — that plan can look like evidence that the agent understands the task. It is not.
 
-The planning research literature makes this clear: planning in LLM-based agents is a useful output to inspect and can catch errors before they happen, but it is not a guarantee of execution quality (Liang et al., 2024). An agent can produce a plausible plan and still read the wrong file, misapply a formula, skip a step under an unusual condition, or confidently report completion when it failed partway through. The plan is a proposal, not a proof.
+The planning research literature is clear on this point: planning in LLM-based agents is a useful output to inspect and can catch errors before they occur, but it is not a guarantee of execution quality (Liang et al., 2024). An agent can produce a plausible plan and still read the wrong file, misapply a formula, skip a step under an unusual condition, or confidently report completion when it failed partway through. The plan is a proposal. It is not a proof.
 
-This applies to the reader's supervision practice: do not approve a plan because it sounds reasonable. Read the plan against the actual scope. Check whether the steps match the task. Ask what would happen if one of the middle steps returned an unexpected result. The plan is useful as a checkpoint, not as a substitute for verification after action.
+This means: do not approve a plan because it sounds reasonable. Read the plan against the actual scope. Check whether the steps match the task as you defined it. Ask what would happen if one of the middle steps returned something unexpected. The plan is useful as a checkpoint — it is the right place to catch a misalignment before action — but it does not substitute for verification after the work is done.
 
-Lucy Suchman's foundational work on situated action supports exactly this caution: plans are schematic approximations of action, not fully determined scripts (cited in Tang et al., 2023). The situated details of real files, real error messages, and real edge cases will not have been in the plan. Verification after action is irreplaceable.
-
----
-
-## Common Misconceptions
-
-**"Agentic means autonomous."** Autonomy is a spectrum and a design variable, not a binary. An agentic system can take real actions in the world and still operate within tight boundaries, with human approval at every consequential step.
-
-**"If the agent has a plan, it knows what it is doing."** A plan is a structured proposal. It can be wrong about context, order, tools, edge cases, or dependencies. The plan is a checkpoint to read and assess, not proof of competence.
-
-**"More tools always means better performance."** More tools expand the action surface and the failure surface equally. Each additional tool is an additional way for the agent to act in ways you did not intend (Li et al., 2024).
-
-**"Human review is a final polish step."** Review is part of the control system. It happens before action (at the plan), during action (at approval gates), and after action (at verification). Leaving it only to the end is the design that lets wrong answers into the world.
-
-**"Agents are mainly for programmers."** Claude Code is built for technical workflows, but Claude Cowork brings agentic capabilities to document, file, spreadsheet, and browser workflows that do not require programming.
+Lucy Suchman's foundational work on situated action captures this precisely: plans are schematic approximations of action, not fully determined scripts (cited in Tang et al., 2023). The situated details of real files, real error messages, and real edge cases will not have been in the plan. That is not a flaw in the plan — it is the nature of plans. It is why verification after action is irreplaceable.
 
 ---
 
-## Exercises: Try This
+## What the Rest of This Book Does
 
-**Exercise 1: Audit a recent delegation.**
-Think of a task you have recently asked an AI assistant to complete. Answer three questions: What did you tell it about scope? Did you review a plan before action? Did you verify the output against the sources? Where, specifically, could an error have entered undetected?
+Chapter 1 draws the taxonomy: what makes a system an agent rather than a chatbot or a workflow tool, and how that distinction changes what you need to do as a user.
 
-**Exercise 2: Name your human-only boundary.**
-For a domain of work you own — a project, a document set, a data set, a workflow — write a one-sentence scope statement for what an agent could be given access to, and a one-sentence statement for what must remain human-only. Keep both sentences specific.
+Chapter 2 works through scope in detail — how to define it, how to communicate it to an agent, and what happens when it is defined poorly.
 
----
+Chapter 3 covers approval gates: when to use them, how many to use, and how to read a plan critically rather than just acknowledging it.
 
-## What Would Change My Mind
+Chapter 4 addresses verification: not as a final step, but as a discipline that runs through the work, with specific techniques for specific output types.
 
-This book argues that supervised delegation is the right model for agentic AI in professional work. That argument would need revision if:
+Chapter 5 examines the surfaces where agents operate — file systems, code, spreadsheets, browsers, connected services — and what each surface requires in terms of the control triad.
 
-- AI systems demonstrated reliable independent verification — meaning they could catch their own factual, logical, and contextual errors without human checking at a rate that exceeded human error rates. Current evidence does not support this.
-- Liability for agentic AI errors shifted fully to the system vendor. Current legal and professional frameworks hold humans accountable for delegated work.
-- The tasks in question were so low-stakes and fully reversible that verification costs exceeded the cost of any potential error. For those narrow cases, lighter supervision is defensible.
+Chapter 6 closes with what does not change: the human decisions that are not delegatable, and why.
 
-For the workflows in this book — professional documents, code, data extraction, file management — the case for human supervision remains strong.
+Every chapter returns to the same three concepts. Scope before action. Approval at consequential checkpoints. Verification before output is used. These are not safety reminders appended to a workflow. They are the workflow.
 
 ---
 
-## Still Puzzling
-
-A few questions this book does not definitively answer:
-
-- How much of the agent's internal reasoning should users be able to inspect, and does more transparency actually improve supervision, or does it just create more to process?
-- Where is the boundary between a tightly constrained agentic workflow and a sophisticated automation script? At what point does an agent become a pipeline?
-- As verification tools improve — linters, test suites, source-comparison tools — will human verification remain as central, or will some verification steps migrate back to the machine?
+The table with the wrong grand total almost went out because there was no step designed to catch it. This book is the design of that step.
 
 ---
 
-## Bridge to Chapter 1
-
-This chapter established that agentic AI is different from chat because it acts in the world. The next question is more precise: not just that agents act, but what makes a system an agent rather than a chatbot or an assistant, and how that distinction changes what you need to do as a user.
-
-Chapter 1 draws the taxonomy.
+<!-- → [TABLE: Control Triad Summary — three columns: Concept | When It Happens | What It Asks — rows for Scope, Approval, Verification] -->
 
 ---
 
-## Sources Used
+*LLM Exercise: You are given a partial agentic workflow description — a task, a set of tools, and an output format. Write a one-paragraph scope statement, name the approval gates you would place, and describe a specific verification check you would run on the output. The task is: "Summarize key financial figures from twelve quarterly reports into a single comparison table."*
 
-- Anthropic, "Claude Code overview," Claude Code Docs. https://code.claude.com/docs
-- Anthropic, "Get started with Claude Cowork," Claude Help Center. https://support.claude.com/en/articles/13345190-get-started-with-claude-cowork
-- Anthropic, "Use Claude Cowork safely," Claude Help Center. https://support.claude.com/en/articles/13364135-use-cowork-safely
-- Anthropic, "Let Claude use your computer in Cowork," Claude Help Center, April 24, 2026. https://support.claude.com/en/articles/14128542-let-claude-use-your-computer-in-cowork
+---
+
+## Sources
+
 - Bainbridge, Lisanne. "Ironies of Automation." *Automatica*, 1983. https://doi.org/10.1016/0005-1098(83)90046-8
 - Li, Xinzhe et al. "A Review of Prominent Paradigms for LLM-Based Agents: Tool Use, Planning, and Feedback Learning." arXiv, 2024. https://arxiv.org/abs/2406.05804
 - Liang, Wenliang et al. "Understanding the Planning of LLM Agents: A Survey." arXiv, 2024. https://arxiv.org/abs/2402.02716
-- Microsoft Research. "Guidelines for Human-AI Interaction." CHI 2019. https://www.microsoft.com/en-us/research/project/guidelines-for-human-ai-interaction/publications/
 - Parasuraman, R., Sheridan, T. B., and Wickens, C. D. "A Model for Types and Levels of Human Interaction with Automation." 2000. https://pubmed.ncbi.nlm.nih.gov/11760769/
 - Tang, Xiangru et al. "A Survey on Large Language Model based Autonomous Agents." arXiv, 2023. https://arxiv.org/abs/2308.11432
 
