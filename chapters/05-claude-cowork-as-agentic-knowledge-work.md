@@ -1,230 +1,167 @@
 # Chapter 5 — Claude Cowork as Agentic Knowledge Work
+*Polished and correct are different properties, and conflating them is how the damage gets done.*
 
-## TL;DR
+A program manager asks an AI agent to prepare a briefing from the past month's project documents — meeting notes, status updates, email summaries, a few draft memos. The output arrives in twenty minutes: cleanly formatted, reasonable headings, confident bullet points. The manager shares it with leadership before reading it carefully.
 
-- Claude Cowork brings agentic AI to non-engineering work: files, documents, folders, apps, and browser sources.
-- The agentic loop is identical to the engineering case; what changes is the verification method. Tests and diffs become source checks, row counts, and human review.
-- A polished output is not a verified output. The capable user defines the task packet before work starts and checks claims, sources, omissions, and privacy before using the result.
-- Cowork is well-suited to repetitive, multi-step, document-heavy work. It is poorly suited to tasks that require tacit judgment, involve confidential data without governance, or produce external-facing actions the human has not reviewed.
+Three things went wrong. The report attributed a decision to a person who had only proposed it — the final decision was never made. It dropped the one dissenting memo entirely. And it drew on a document clearly labeled DRAFT — NOT FOR DISTRIBUTION, which happened to be sitting in the same folder as everything else.
 
----
+The output was fluent. The workflow failed. Not because the agent fabricated anything or acted in bad faith. Because "polished" and "correct" are different properties, and the manager treated the first as evidence of the second.
 
-## Opening Scene
-
-A program manager asks an AI agent to prepare a briefing from the past month's project documents — meeting notes, status updates, email summaries, and a few draft memos. The output arrives in twenty minutes: cleanly formatted, reasonable headings, confident bullet points. The manager shares it with leadership before reading it carefully.
-
-Three things went wrong. The report attributed a decision to a person who had only proposed it; the final decision was never made. It dropped the one dissenting memo entirely. And it drew on a document that was clearly labeled DRAFT — NOT FOR DISTRIBUTION, which happened to be in the same folder as the others.
-
-The output was fluent. The workflow failed. Not because the agent lied, but because "polished" and "correct" are different properties, and the manager treated the first as evidence of the second.
-
-This chapter shows what a supervised Cowork workflow looks like instead.
+That gap — between what the output looks like and what it actually is — is what this chapter is about. Cowork is genuinely capable at the kind of multi-document, multi-step knowledge work that most professional life is made of. Using it well means understanding where the loop can slip before you build the workflow, not after you've already sent the briefing to your director.
 
 ---
 
-## What This Chapter Lets You Do
+## What Cowork Actually Is
 
-By the end of this chapter you can:
+Claude Cowork is an agentic AI environment for desktop knowledge work (Anthropic, "Get started with Claude Cowork") [verify — current as of writing]. That phrasing matters. It is not a document editor with AI suggestions wired in. It is an agent — with a tool set and an action surface — that operates in the domain where most professional work happens: files, folders, documents, spreadsheets, browser sources, connected services, and the applications running on your computer.
 
-- Explain what makes Cowork an agentic system rather than a document editor.
-- Build a task packet that bounds what the agent can access and what it must produce.
-- Apply the access hierarchy: connectors before browser before computer use.
-- Identify which knowledge-work tasks are well-suited to agentic automation and which are not.
-- Use a verification checklist designed for document and data outputs.
-- Decide whether a Cowork output is ready to use or needs revision.
+Concretely, Cowork can read files in a folder you designate, create or edit documents and spreadsheets, use connected services through plugins and MCP connectors, browse web sources, interact directly with desktop applications through computer use, and execute scheduled tasks without your presence.
+
+The agentic loop from Chapter 2 operates here exactly as it did in the Claude Code context: Cowork observes the files and instructions you provide, forms a plan, acts through tool calls, checks its progress, and reports. What changes between the engineering case and the knowledge-work case is the medium — documents instead of code — and the verification method. There is no test suite. There are no diffs that tell you unambiguously what changed. Verification means a human reading the output against the sources, and that is not optional.
 
 ---
 
-## What Claude Cowork Is
+## The Access Ladder
 
-Claude Cowork is an agentic AI environment for desktop knowledge work [verify — current as of writing]. Where Claude Code operates in a repository with shell commands and tests, Cowork operates in the space where most professional work happens: files, folders, documents, spreadsheets, browser sources, connected services, and the applications on your computer.
+Cowork reaches information and services through four increasingly powerful mechanisms, and the Anthropic documentation is explicit about preferring the lower rungs before climbing to the higher ones (Anthropic, "Let Claude use your computer in Cowork," 2026) [verify — current as of writing].
 
-Cowork can:
+**Connectors and plugins** are the lowest-risk external access. They provide defined interfaces to specific services — a calendar, a project management tool, cloud storage — with bounded scope. Before enabling a connector, the question to ask is not just what it can read but what actions it can take. A calendar connector that reads events is different from one that creates, modifies, or deletes them. The permission is the capability.
 
-- Read files in a folder you designate
-- Create or edit documents, spreadsheets, and other file types
-- Use connected services through plugins and MCP connectors
-- Browse web sources
-- Interact directly with applications on your desktop through computer use
-- Execute scheduled tasks without your presence
+**Designated folder access** means the agent can read every file in a folder you specify. This is where the opening scene failed. The agent read everything it was given access to, including the draft memo that should never have been in scope. The folder is not a neutral container. It is a permission grant. What goes in the folder is a decision the human makes, not the agent.
 
-This is not a document editor that uses AI for suggestions. It is an agent with a tool set and an action surface. The Anthropic documentation frames it explicitly: Cowork brings Claude Code-level agentic capability to noncoding desktop workflows (Anthropic, "Get started with Claude Cowork") [verify — current as of writing].
+**Browser access** allows the agent to load and interact with web pages. For knowledge work this usually means research from public sources. The risks are specific: the agent may reach sites you did not intend; web content can contain adversarial instructions that manipulate agent behavior (VPI-Bench, 2026); login portals and form submissions are not appropriate targets for unattended browsing. Browser tasks should specify named trusted sources and explicitly prohibit form submission, login, and purchase.
 
-The agentic loop from Chapter 2 operates unchanged: Cowork observes the files and context you provide, forms a plan, acts through tool calls, checks its progress, and reports. The differences from Claude Code are in the medium (documents instead of code) and in the verification method (human review instead of a test suite).
+**Computer use** allows the agent to observe and interact with anything visible on the desktop — any application, any window, any content. This is the broadest access level in the hierarchy and the hardest to scope tightly. The AgentDojo research documents that agents operating across files, browsers, and services face real adversarial risk from instructions injected into documents and web content (AgentDojo). That risk scales with breadth. Computer use warrants the most conservative permission design and the closest output review of any Cowork access type.
 
----
-
-## The Knowledge-Work Action Surface
-
-Cowork's access types follow the same ladder described in Chapter 3, with a few knowledge-work-specific notes:
-
-| Cowork access type | What it can expose or change | Risk level | Default rule |
-|---|---|---|---|
-| Uploaded or attached file | Contents of that file | Moderate | Use copies; review for sensitive content |
-| Designated folder | Every file in scope | Moderate–high | Use a dedicated working folder |
-| Connector / plugin | Service data and actions | High | Scope narrowly; inspect before enabling |
-| Browser | Web pages, forms, logins | High | Trusted public sources only |
-| Computer use | Any visible app or content | High | Use only with explicit scope |
-| Scheduled task | Unattended repeated actions | High | Low-risk only; review output cycle |
-
-The opening scene's failure was a folder-access failure. When the agent could read everything in the folder, it read everything — including the draft memo marked not for distribution. The fix is simple: a dedicated working folder containing only the documents cleared for this task.
+<!-- → [TABLE: four rows, one per access type — connector/plugin, folder, browser, computer use — columns: what it exposes or can change, risk level, default rule the human should apply] -->
 
 ---
 
 ## The Task Packet
 
-Effective Cowork supervision starts before the agent acts. A **task packet** is the set of decisions the human makes in advance:
+Effective Cowork supervision starts before the agent acts. The mechanism is a task packet — the set of decisions the human makes in advance that determines what the agent can see, what it must produce, and where the human will check before the work proceeds.
 
-**Working folder.** Which specific folder, and what is in it? The folder should contain copies of approved files, not originals. Files outside the task scope should not be in the folder.
+**Working folder.** Which specific folder, and what is actually in it? The folder should contain copies of approved files, not originals. Files outside the task scope — drafts, confidential data, personal files, anything marked not for distribution — should be removed or kept in a separate location before the task starts.
 
-**Allowed files.** Are all files in the folder in scope, or only named ones? If the folder contains anything that should not be read (drafts, personal files, confidential data), remove or exclude them before starting.
+**Allowed and forbidden files.** If the folder contains anything that should not be read, it should not be in the folder. Relying on the agent to infer that a file is off-limits from a label it might not read consistently is not a supervision strategy.
 
-**Forbidden files and actions.** What should the agent not touch? This includes files containing personal data, regulated information, credentials, or anything marked as draft or confidential unless it is explicitly part of the task.
+**Output specification.** What specific file or files should the task produce? A clear specification prevents the agent from generating extra artifacts or overwriting existing ones.
 
-**Output artifact.** What specific file or files should the task produce? A clear output specification prevents the agent from generating extra artifacts or overwriting existing ones.
+**Source-log requirement.** For any report or summary that will be shared, require the agent to list which files it drew on for each section. Without a source map, checking claims requires re-reading everything. With one, verification is targeted.
 
-**Source-log requirement.** Should the agent list which files it drew on for each section? For any report or summary that will be shared, a source map is the minimum verification aid. Without it, checking claims requires re-reading everything.
+**Approval points.** For multi-step tasks — extract, then draft, then format — define where the human reviews before the next step runs. Plan approval is cheaper than output revision.
 
-**Approval points.** Which steps require explicit human review before proceeding? For a multi-step task — extract, then draft, then format — define where the human checks before the next step runs.
+**Verification checklist.** Before the task begins, decide what specific checks you will perform after it ends. A checklist made in advance is more reliable than a spot-check made under time pressure.
 
-**Verification checklist.** After the task completes, what specific checks will the human perform before using the output?
-
----
-
-## Worked Example: Report from Approved Files
-
-Here is a complete supervision trace for the briefing task from the opening scene, rebuilt correctly.
-
-**Task definition.** The program manager creates a folder called `/project-briefing-working/` and copies only the finalized, distributable documents into it: meeting notes from three sessions, two official status updates, and one approved summary memo. The draft memo and anything marked confidential remain in the original location.
-
-**Task packet.** Allowed: all files in `/project-briefing-working/`. Output: `briefing-draft.docx`. Source log: required (each section lists its source files). Forbidden actions: no browser, no external messages, no deletion. Approval point: review the outline before drafting begins.
-
-**Plan review.** Cowork produces a proposed outline. The manager reads it. The outline includes a "pending decisions" section — which is correct. It does not include a section on the one dissenting view from the project. The manager adds an instruction: "Include a section on the dissenting position from the March 14 notes."
-
-**Artifact review.** The briefing draft arrives. The manager works through the verification checklist:
-
-- *Source map.* Each section lists the documents it drew from. The "pending decisions" section cites two meeting notes — the manager checks both and confirms the agent correctly identified one decision as pending rather than made.
-- *Claims check.* The manager reads the attributed-decision claim. The source note points to a specific meeting note. The manager reads that passage: it was a proposal, not a decision. The claim is wrong. The manager corrects it before sharing.
-- *Omissions.* The dissenting view is now present because the manager added it to the instructions. The manager checks that the draft represents it fairly rather than dismissing it.
-- *Privacy check.* The source log lists the three meeting notes, two status updates, and the approved memo — all files that were cleared for the folder. No unlisted files appear.
-
-**Decision.** The manager revises the attributed-decision claim, reviews the revision, and shares the corrected briefing.
-
-This is more work than accepting the first output. It is less work than recovering from a wrong claim reaching leadership.
+<!-- → [INFOGRAPHIC: task packet as a pre-flight checklist — six items labeled, each with a one-line description of what it prevents] -->
 
 ---
 
-## The Access Hierarchy: Connectors, Browser, Computer
+## A Briefing Task, Done Right
 
-Cowork offers multiple ways to reach external information and services. The Anthropic documentation recommends a hierarchy: prefer connectors over browser access, and prefer both over direct computer use where the same task can be accomplished by a lower-risk path [verify — current as of writing] (Anthropic, "Let Claude use your computer in Cowork," 2026).
+Here is the opening scene rebuilt with the task packet in place.
 
-**Connectors and plugins** are the lowest-risk external access. They provide defined interfaces to services — calendar, project management tool, cloud storage — with bounded scope. Before enabling a connector, check what it can read and what actions it can take. A calendar connector that can read events is different from one that can create, modify, or delete them.
+The program manager creates a folder called `/project-briefing-working/` and copies only finalized, distributable documents into it: meeting notes from three sessions, two official status updates, and one approved summary memo. The draft memo and anything marked confidential remain in the original location.
 
-**Browser access** allows the agent to load and interact with web pages. For knowledge work, this means research from public sources. The risks include: the agent may reach sites you did not intend; web page content can contain adversarial instructions (VPI-Bench, 2026); login portals and form submissions are not appropriate targets for unattended browsing. Restrict browser tasks to named trusted sources, and prohibit any form submission, login, or purchase.
+Task packet: allowed — all files in `/project-briefing-working/`. Output: `briefing-draft.docx`. Source log required — each section must list its source files. Forbidden: no browser, no external messages, no file deletion. Approval point: review the outline before drafting begins.
 
-**Computer use** allows the agent to observe and interact with anything on the desktop: any app, any window, any visible content. This is the broadest access level and the hardest to scope. Computer-use tasks warrant the most conservative permission design and the closest output review. The AgentDojo research shows that agents using tools across files, browsers, and services face real adversarial risk from injected instructions in documents and web content (AgentDojo) — a risk that scales with the breadth of what the agent can see and do.
+Cowork produces a proposed outline. The manager reads it. The outline includes a "pending decisions" section — correct. It does not include a section on the one dissenting view from the project. The manager adds an instruction: include a section on the dissenting position from the March 14 notes. The outline is approved.
 
----
+The briefing draft arrives. The manager runs the verification checklist.
 
-## What Cowork Does Well
+*Source map.* Each section lists the documents it drew from. The "pending decisions" section cites two meeting notes. The manager checks both and confirms the agent correctly identified one decision as pending rather than made.
 
-Knowledge-work tasks that are well-suited to agentic automation share several properties: they are repetitive or structurally consistent, they involve multiple documents or data sources, the output has a definable form, and the human can verify the result without re-doing the task from scratch.
+*Claims check.* The manager reads the attributed-decision claim. The source note points to a specific meeting note. The manager reads that passage: it was a proposal, not a decision. The claim is wrong. The manager corrects it before sharing.
 
-| Cowork task | Fit | Main risk | Verification |
-|---|---|---|---|
-| Report from approved files | Strong | Unsupported claims, omissions | Source map; claims check |
-| Spreadsheet extraction from PDFs | Strong | Wrong rows, formula errors | Row counts; sample spot-check |
-| Cross-document summary | Strong | Lost minority views, contradictions | Human reading of summary + sources |
-| Meeting-note synthesis | Strong | Wrong commitments, wrong attribution | Human confirmation before sharing |
-| Folder organization (on copies) | Moderate | Misfiled or misnamed items | Human review before touching originals |
-| Slide deck from source packet | Moderate | Visual claims, confidential content | Human review of every slide |
-| External message sending | Poor | Real-world consequence before review | Human-only; never delegate |
-| Sensitive or regulated data processing | Poor without governance | Privacy, legal, and compliance risk | Approved systems and processes only |
+*Omissions.* The dissenting view is present because the manager added it to the instructions. The manager checks that the draft represents it fairly rather than dismissing it.
 
-The distinction between strong-fit and poor-fit tasks is the reversibility test from Chapter 3. Reports, summaries, and extractions can be revised before use. External messages and regulated-data actions cannot be undone.
+*Privacy check.* The source log lists the three meeting notes, two status updates, and the approved memo — all files that were cleared for the folder. No unlisted files appear.
+
+The manager revises the attributed-decision claim, reviews the revision, and shares the corrected briefing.
+
+This is more work than accepting the first output. It is less work than recovering from a wrong claim that has already reached leadership.
+
+<!-- → [DIAGRAM: side-by-side comparison of the unsupervised workflow (folder → agent → share) and the supervised workflow (folder prep → task packet → plan approval → draft → verification checklist → share), with the failure points marked on the unsupervised path] -->
 
 ---
 
-## The RPA Context
+## The Research Context: RPA and What Changed
 
-Office automation is not new. Robotic Process Automation (RPA) systems have automated repetitive document and data tasks since the early 2010s, changing knowledge-worker roles in measurable ways (Lacity, Willcocks, and Craig, 2020). The shift with language-driven agentic AI is that task specification changes: instead of programming every step in a workflow, a user can describe the goal and let the agent plan and use tools.
+Office automation is not new. Robotic Process Automation systems have handled repetitive document and data tasks since the early 2010s, changing knowledge-worker roles in measurable ways (Lacity, Willcocks, and Craig, 2020). The shift with language-driven agentic AI is in how tasks are specified: instead of programming every step of a workflow, a user describes a goal and lets the agent plan the steps and select the tools.
 
-That flexibility creates different risks than scripted RPA. A scripted workflow does exactly what it was programmed to do. An agentic workflow improvises when it encounters something unexpected. Improvisation is not always wrong — it is sometimes exactly what makes flexible agents valuable. But improvisation within a broad action surface is where overreach happens. The task packet is the mechanism for converting flexible capability into bounded action (Kedziora, Siemon, and Kedziora, 2026).
+That flexibility is the capability. It is also the new risk.
+
+A scripted RPA workflow does exactly what it was programmed to do. An agentic workflow improvises when it encounters something unexpected. Improvisation is not always wrong — it is sometimes the whole point of using a flexible agent rather than a rigid script. But improvisation within a broad action surface is where overreach happens, where a draft memo gets read because it was in the folder, where a claim gets attributed to the wrong person because the agent interpolated from context rather than from evidence. The task packet is the mechanism for converting flexible capability into bounded action, and the Cowork research literature frames it in exactly those terms (Kedziora, Siemon, and Kedziora, 2026).
 
 ---
 
-## Scheduled Tasks and Unattended Action
+## What Cowork Does Well, and What It Doesn't
 
-Cowork supports scheduled tasks that run without your presence. The agentic properties remain; the supervision moment is compressed into the setup.
+Knowledge-work tasks that are well-suited to agentic automation share a few properties: they are structurally consistent enough that the output form can be defined in advance, they involve multiple documents or data sources that a human would find tedious to synthesize manually, and the human can verify the result without re-doing the whole task from scratch.
 
-Before scheduling a recurring task:
+Tasks that are poorly suited share different properties: they require tacit judgment the agent cannot make, involve confidential or regulated data without governance structures, or produce external-facing actions the human has not reviewed.
 
-- The task should be low-risk and reversible.
-- The output should be something the human reviews before acting on.
-- The folder and access scope should be as narrow as possible.
-- There should be a regular review cycle — the human examines what the scheduled task has been doing, not just the most recent output.
-- Unattended tasks should not send external messages, modify records, delete files, or interact with regulated data.
+<!-- → [TABLE: eight task types in rows — report from approved files, spreadsheet extraction from PDFs, cross-document summary, meeting-note synthesis, folder organization on copies, slide deck from source packet, external message sending, sensitive data processing — columns: fit (strong/moderate/poor), main risk, verification method] -->
 
-The Anthropic documentation on assigning tasks remotely supports the point that task delegation from a distance increases the supervision responsibility at setup time (Anthropic, "Assign tasks from anywhere in Claude Cowork") [verify — current as of writing].
+The reversibility test from Chapter 3 is the reliable discriminator. Reports, summaries, and extractions can be revised before they leave your control. External messages cannot be unsent. Regulated-data actions carry compliance consequences that do not reverse when you correct the document.
+
+---
+
+## Scheduled Tasks and What They Require
+
+Cowork supports scheduled tasks that run without your presence. The agentic properties are unchanged; what compresses is the supervision window. When the task runs unattended, the setup is the only moment available for supervision design.
+
+Before scheduling a recurring task: confirm the task is low-risk and reversible; confirm the output is something you will review before acting on; make the folder and access scope as narrow as possible; build in a regular review cycle where you examine what the scheduled task has been producing, not just the most recent output; and prohibit unattended tasks from sending external messages, modifying records, deleting files, or touching regulated data.
+
+The Anthropic documentation on assigning tasks remotely supports the practical point: task delegation from a distance increases the supervision responsibility at setup time (Anthropic, "Assign tasks from anywhere in Claude Cowork") [verify — current as of writing]. What you cannot supervise in real time, you must constrain in advance.
 
 ---
 
 ## The Human Gate in Knowledge Work
 
-The Microsoft Research guidelines for human-AI interaction identify transparency, recoverability, and appropriate calibration of trust as principles for AI-assisted work (Microsoft Research, 2019). In practice, the human gate for Cowork tasks has four moments:
+The Microsoft Research guidelines for human-AI interaction identify transparency, recoverability, and appropriate calibration of trust as principles for AI-assisted work (Microsoft Research, 2019). In the Cowork context, those principles reduce to four concrete moments.
 
-**Before the task:** Define the task packet. Bound the folder. State the forbidden actions. Require the source log.
+*Before the task:* Define the task packet. Bound the folder. State the forbidden actions. Require the source log.
 
-**Before each major step:** If the task is multi-phase, review the plan and the output of each phase before the next begins. Do not authorize drafting before reviewing the outline.
+*Before each major step:* If the task is multi-phase, review the plan and the phase output before the next step begins. Do not authorize drafting before you have reviewed the outline. The plan gate is the cheapest intervention point; it costs nothing to redirect before execution starts.
 
-**After the task:** Run the verification checklist. Check sources, claims, omissions, and privacy before using the output.
+*After the task:* Run the verification checklist. Check sources, claims, omissions, and privacy before the output is used.
 
-**Before sharing or acting:** The final gate is the moment before the output leaves your control. If you are not certain the output is correct, do not share it.
+*Before sharing or acting:* The final gate is the moment before the output leaves your control. If you are not certain it is correct, it is not ready to share.
 
 The polished artifact is not the finish line. The finish line is a reviewed, verified output you are willing to put your name on.
 
 ---
 
-## Common Misconceptions
+## The Omission Problem
 
-**"Cowork is for people who do not need to think technically."** Cowork requires careful task definition, access boundary design, and substantive output verification. The supervision discipline is the same as for Claude Code; the domain is different.
+There is an asymmetry in how errors surface. Incorrect information is something you can point at — a wrong name, a wrong figure, a misattributed claim. Missing information is harder to catch because there is nothing to point at. The dissenting memo that was dropped from the opening scene's briefing was invisible in the output. You would have to know it existed, and know to look for it, to find the gap.
 
-**"A polished document means the workflow succeeded."** Fluency is not accuracy. Format is not correctness. The opening scene is a polished, correct-looking failure.
+This is a real open problem in knowledge-work supervision. The omission may be the most consequential failure mode and the hardest to see. Source logs help — if the agent lists every file it drew on, you can check whether any expected source is absent. But source logs are only as complete as what the agent chose to note, and the agent that silently skipped a file may not note it.
 
-**"Computer use is just another connector."** Computer use gives the agent access to any visible application and content on your desktop. It is the broadest access level in the Cowork hierarchy.
-
-**"Folder access is low risk."** A folder containing documents can also contain sensitive contracts, draft communications, confidential data, and personal information. The risk level of folder access depends on what the folder contains.
-
-**"Meeting summaries can be shared without review."** Meeting summaries produced by an agent can misattribute statements, record proposals as decisions, omit dissenting views, and lose nuance. Always confirm commitments and attributions before sharing.
-
-**"If Cowork made the file, it checked the file."** The agent produces an output. Verification is a separate step that the human performs. Production and verification are not the same.
-
----
-
-## Try This
-
-**Exercise 1: Build a task packet.**
-Choose a multi-step document task from your work: assembling a report, synthesizing meeting notes, extracting data from several sources. Write a task packet for it: working folder, allowed files, forbidden files or actions, output artifact, source-log requirement, approval points, and verification checklist. What decisions did the task packet force you to make that you would have left implicit otherwise?
-
-**Exercise 2: Verify an output.**
-Take any AI-generated document — one you made, one from a colleague, or one from a public example. Apply the following checks: identify every claim that can be verified from the stated sources; find at least one claim that needs source confirmation; identify what the document does not include that a careful human reader would expect. What did the verification exercise reveal?
+The partial remedy is to include the expected sources explicitly in the task packet, not just the folder. If the task is to synthesize three specific meeting notes, name them. Then confirm in the source log that all three appear. It is not a complete solution. It is the best available one.
 
 ---
 
 ## What Would Change My Mind
 
-This chapter's verification-first stance would soften for outputs where the stakes are low and the verification cost is high relative to the harm of an error. For internal working documents used as rough inputs to human judgment — draft outlines, exploratory summaries, first-pass extractions — the argument for exhaustive review before every use is weaker. The chapter's caution is strongest for outputs that will be shared, acted on, or used as the basis for decisions. If your Cowork output stays internal and tentative, lighter review is defensible. If it leaves your control, treat it as a claim that needs a source.
+The verification-first stance here would soften for outputs where the stakes are low and the verification cost is high relative to the harm of a possible error. For internal working documents — draft outlines, exploratory first-pass summaries used as rough inputs to human judgment — exhaustive review before every use is probably not warranted. The chapter's caution is strongest for outputs that will be shared, acted on, or used as the basis for decisions. If your Cowork output stays internal and explicitly tentative, lighter review is defensible. The moment it leaves your control, treat every claim as needing a source.
 
 ---
 
 ## Still Puzzling
 
-How do nontechnical users reliably detect what an AI agent has omitted? Missing information is harder to catch than incorrect information, because there is nothing to point at. Research on how users supervise agentic office workflows and identify omissions in summaries is still limited (Research gap noted in Cowork research file). This is a real open problem for knowledge-work supervision: the omission may be the most consequential failure and the hardest to see.
+The omission problem I described above does not have a clean solution. How do users reliably detect what an agent has left out? Research on how people supervise agentic office workflows and catch omissions in summaries is still limited. The tools exist to catch wrong claims — you can check a citation. No obvious tool exists to surface what should have been included but wasn't. This feels like the most important open question for knowledge-work supervision, and the field has not answered it.
 
 ---
 
-## Bridge to Chapter 6
+## LLM Exercises
 
-Chapters 3, 4, and 5 cover what an agent can do with its built-in tool surface. Chapter 6 asks what happens when that surface expands through MCP — the Model Context Protocol — which connects agents to external systems, databases, APIs, and services beyond what ships in the product. MCP changes the capability calculation and the permission calculation simultaneously. The same principles apply; the action surface grows in ways that require explicit review.
+**1.** Build a task packet for a real document task you would delegate to Cowork: a report, a synthesis, an extraction. Write out all six components — working folder, allowed files, forbidden files or actions, output specification, source-log requirement, and verification checklist. Before submitting, ask Claude to identify any ambiguities in your packet that could lead to an unexpected result. Revise based on what it finds.
+
+**2.** Take any AI-generated document — your own, a colleague's, or a public example. Apply a four-part verification: identify every claim that can be checked against the stated sources; find at least one claim that needs source confirmation; identify what the document does not include that a careful reader would expect; check whether any information in the document could have come from a source that should have been excluded. What did the exercise reveal about the difference between reading and verifying?
+
+**3.** Ask Cowork to summarize a set of documents and produce a source log alongside the summary. Then ask it to explicitly flag any section where it relied on inference rather than a direct citation from a source document. Compare the flagged sections to the unflagged ones. What does the distribution tell you about where the agent's confidence is reliable for this type of task?
 
 ---
 
@@ -235,8 +172,8 @@ Chapters 3, 4, and 5 cover what an agent can do with its built-in tool surface. 
 - Anthropic. "Let Claude use your computer in Cowork." *Claude Help Center*, April 24, 2026. https://support.claude.com/en/articles/14128542-let-claude-use-your-computer-in-cowork [verify — current as of writing]
 - Anthropic. "Organize your tasks with projects in Claude Cowork." *Claude Help Center*. https://support.claude.com/en/articles/14116274-organize-your-tasks-with-projects-in-cowork [verify — current as of writing]
 - Anthropic. "Assign tasks from anywhere in Claude Cowork." *Claude Help Center*. https://support.claude.com/en/articles/13947068-assign-tasks-to-claude-from-anywhere-in-cowork [verify — current as of writing]
-- Lacity, M., Willcocks, L., and Craig, A. "Robotic Process Automation and Consequences for Knowledge Workers: a Mixed-Method Study." 2020. https://pmc.ncbi.nlm.nih.gov/articles/PMC7134300/
-- Kedziora, D., Siemon, D., and Kedziora, D. "Identifying and Overcoming Challenges in Intelligent Process Automation." *California Management Review*, 2026. https://journals.sagepub.com/doi/10.1177/00081256261434509
-- VPI-Bench. "Visual Prompt Injection Attacks for Computer-Use Agents." *arXiv*, 2025/2026. https://arxiv.org/abs/2506.02456
 - AgentDojo. "A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents." https://agentdojo.spylab.ai/
+- Kedziora, D., Siemon, D., and Kedziora, D. "Identifying and Overcoming Challenges in Intelligent Process Automation." *California Management Review*, 2026. https://journals.sagepub.com/doi/10.1177/00081256261434509
+- Lacity, M., Willcocks, L., and Craig, A. "Robotic Process Automation and Consequences for Knowledge Workers: a Mixed-Method Study." 2020. https://pmc.ncbi.nlm.nih.gov/articles/PMC7134300/
 - Microsoft Research. "Guidelines for Human-AI Interaction." *CHI*, 2019. https://www.microsoft.com/en-us/research/project/guidelines-for-human-ai-interaction/publications/
+- VPI-Bench. "Visual Prompt Injection Attacks for Computer-Use Agents." *arXiv*, 2025/2026. https://arxiv.org/abs/2506.02456
