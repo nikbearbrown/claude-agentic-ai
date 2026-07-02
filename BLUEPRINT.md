@@ -1,5 +1,5 @@
 # Claude Agentic AI
-## Full TOC Draft - Tik TOC Architecture
+## Full TOC Draft - Blueprint Architecture
 
 **Working title:** Claude Agentic AI: A Practitioner's Guide to Supervised Agents  
 **Author:** Humanitarians AI Incorporated  
